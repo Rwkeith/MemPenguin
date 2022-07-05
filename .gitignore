@@ -1,0 +1,4 @@
+.vscode/
+subprojects/*
+!subprojects/LinuxOverlay.wrap
+*.ini

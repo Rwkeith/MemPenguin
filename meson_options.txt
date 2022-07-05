@@ -1,0 +1,1 @@
+option('LinuxOverlayBuildType', type : 'combo', value : 'dependency', choices: ['standalone', 'dependency'])
