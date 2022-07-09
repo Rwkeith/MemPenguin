@@ -1,4 +1,4 @@
-#include "subprojects/LinuxOverlay/include/Overlay.h"
+#include "Overlay.h"
 #include "Process.h"
 
 int main(int, char**)
