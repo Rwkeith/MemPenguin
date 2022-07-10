@@ -3,4 +3,4 @@ url = https://github.com/Rwkeith/LinuxOverlay.git
 revision = master
 
 [provide]
-dependency_names = LinuxOverlay
+dependency_names = linuxoverlay

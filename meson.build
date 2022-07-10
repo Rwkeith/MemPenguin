@@ -1,9 +1,11 @@
+# meson subprojects purge works wonders :)
+
 project('MemPenguin', 'cpp')
 
-incdir = include_directories('.', './include') #'./subprojects/LinuxOverlay/include/', './subprojects/ImGUI', './subprojects/ImGUI/backends')
+incdir = include_directories('.', './include')
 
-
-LinuxOverlayLib = subproject('LinuxOverlay').get_variable('LinuxOverlayDep')
+subproject('LinuxOverlay')
+LinuxOverlay = dependency('linuxoverlay')
 
 ImGUIinc = subproject('ImGUI').get_variable('imguiInc')
 glfwInc = subproject('glfw').get_variable('glfwIncs')
@@ -14,4 +16,4 @@ files = files(
     'Interface.cpp'
 )
 
-executable('MemPenguin', files, include_directories : [incdir, ImGUIinc, glfwInc], dependencies : [LinuxOverlayLib] )
+executable('MemPenguin', files, include_directories : [incdir, ImGUIinc, glfwInc], dependencies : [LinuxOverlay] )
