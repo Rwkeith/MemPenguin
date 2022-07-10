@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/Rwkeith/LinuxOverlay.git
-revision = head
+revision = master
 
 [provide]
 dependency_names = LinuxOverlay
