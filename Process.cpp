@@ -1,8 +1,15 @@
 #include "include/Process.h"
 
+Process::Process(const char* inProcName, int inPid)
+{
+    procName = inProcName;
+    pid = inPid;
+    UpdateAddrSpace();
+}
+
 Process::Process(const char* inProcName, bool wait)
 {
-    strcpy(procName, inProcName);
+    procName = inProcName;
     if (!GetPid(wait))
         return;
     
@@ -17,7 +24,7 @@ int Process::GetPid(bool wait)
 {
     char pidLine[1024];
     char commandStr[] = "pidof ";
-    strcat(commandStr, procName);
+    strcat(commandStr, procName.c_str());
     FILE * command = popen(commandStr, "r");
 
     if (command == NULL)
@@ -28,10 +35,10 @@ int Process::GetPid(bool wait)
 
     fgets(pidLine, 1024, command);
     pid = strtoul(pidLine, NULL, 10);
-     pclose(command);
+    pclose(command);
     if (wait && pid == 0)
     {
-        printf("Waiting for %s to start...\n", procName);
+        printf("Waiting for %s to start...\n", procName.c_str());
         while (pid == 0)
         {
             sleep(3);
@@ -43,10 +50,10 @@ int Process::GetPid(bool wait)
     }
     else if (pid == 0)
     {
-        printf("%s is not currently running...\n", procName);
+        printf("%s is not currently running...\n", procName.c_str());
         return pid;
     }
-    printf("%s's process id is %i\n",procName, pid);
+    printf("%s's process id is %i\n",procName.c_str(), pid);
     return pid;
 }
 
@@ -74,7 +81,7 @@ unsigned long Process::GetModuleBase(const char* moduleName)
 void Process::UpdateAddrSpace()
 {
     char *lineBuffer = (char*)calloc(0x1000, 1);
-    AddrSpaceEntry addrSpaceEntry;
+    AddrSpace addrSpaceEntry;
     
     addrSpace.clear();
     sprintf(lineBuffer, "/proc/%d/maps", pid);
@@ -96,7 +103,7 @@ void Process::UpdateAddrSpace()
     free(lineBuffer);
 }
 
-std::vector<AddrSpaceEntry> Process::GetAddrSpace()
+std::vector<AddrSpace> Process::GetAddrSpace()
 {
     UpdateAddrSpace();
     return addrSpace;
@@ -104,7 +111,7 @@ std::vector<AddrSpaceEntry> Process::GetAddrSpace()
 
 void Process::PrintAddrSpace()
 {
-    printf("Printing address space of %s\n", procName);
+    printf("Printing address space of %s\n", procName.c_str());
 
     UpdateAddrSpace();
 

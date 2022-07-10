@@ -7,13 +7,14 @@ incdir = include_directories('.', './include')
 subproject('LinuxOverlay')
 LinuxOverlay = dependency('linuxoverlay')
 
-ImGUIinc = subproject('ImGUI').get_variable('imguiInc')
+imGuiInc = subproject('ImGUI').get_variable('imguiInc')
 glfwInc = subproject('glfw').get_variable('glfwIncs')
 
 files = files(
     'Main.cpp',
     'Process.cpp',
-    'Interface.cpp'
+    'Interface.cpp',
+    'System.cpp'
 )
 
-executable('MemPenguin', files, include_directories : [incdir, ImGUIinc, glfwInc], dependencies : [LinuxOverlay] )
+executable('MemPenguin', files, include_directories : [incdir, imGuiInc, glfwInc], dependencies : [LinuxOverlay] )
