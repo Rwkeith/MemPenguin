@@ -1,8 +1,8 @@
 #pragma once
 
 #include "imgui.h"
-#include "include/System.h"
-#include "include/Interface.h"
+#include "System.h"
+#include "Interface.h"
 
 class ConsoleWindow
 {

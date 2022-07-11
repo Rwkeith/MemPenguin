@@ -1,6 +1,5 @@
-#include "include/Interface.h"
-#include "include/ConsoleWindow.h"
-#include "include/Helpers.h"
+#include "ConsoleWindow.h"
+#include "Helpers.h"
 
 
 MainInterface* ConsoleWindow::mainInterface;

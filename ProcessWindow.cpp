@@ -1,5 +1,4 @@
-#include "include/Interface.h"
-#include "include/ProcessWindow.h"
+#include "ProcessWindow.h"
 
 MainInterface* ProcessWindow::mainInterface;
 

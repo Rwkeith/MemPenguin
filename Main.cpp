@@ -1,7 +1,6 @@
 #include "Overlay.h"
 #include "Process.h"
 #include "Interface.h"
-#include "System.h"
 
 int main(int, char**)
 {

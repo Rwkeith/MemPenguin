@@ -1,4 +1,4 @@
-#include "include/Process.h"
+#include "Process.h"
 
 Process::Process(const char* inProcName, int inPid)
 {

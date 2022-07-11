@@ -1,10 +1,6 @@
 #pragma once
 
 #include "imgui.h"
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 
 // Portable helpers
 static int   Stricmp(const char* s1, const char* s2)         { int d; while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; } return d; }
