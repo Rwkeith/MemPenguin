@@ -13,8 +13,11 @@ glfwInc = subproject('glfw').get_variable('glfwIncs')
 files = files(
     'Main.cpp',
     'Process.cpp',
+    'System.cpp',
     'Interface.cpp',
-    'System.cpp'
+    'ProcessWindow.cpp',
+    'ConsoleWindow.cpp',
+    'Helpers.cpp'
 )
 
 executable('MemPenguin', files, include_directories : [incdir, imGuiInc, glfwInc], dependencies : [LinuxOverlay] )
