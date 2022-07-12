@@ -82,12 +82,30 @@ void ProcessWindow::Draw(bool &pOpen)
                 {
                     for (int row = 0; row < mySystem.procList.size(); row++)
                     {
-                        ImGui::TableNextRow();
-                        for (int column = 0; column < COLUMNS_COUNT; column++)
+                        if (Filter.IsActive())
                         {
-                            ImGui::TableSetColumnIndex(column);
-                            if (column == 0) ImGui::Text("%d", mySystem.procList[row].pid);
-                            if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
+                            const char* line_start = mySystem.procList[row].procName.c_str();
+                            const char* line_end = mySystem.procList[row].procName.c_str() + mySystem.procList[row].procName.length();
+                            if (Filter.PassFilter(line_start, line_end))
+                            {
+                                ImGui::TableNextRow();
+                                for (int column = 0; column < COLUMNS_COUNT; column++)
+                                {
+                                    ImGui::TableSetColumnIndex(column);
+                                    if (column == 0) ImGui::Text("%d", mySystem.procList[row].pid);
+                                    if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ImGui::TableNextRow();
+                            for (int column = 0; column < COLUMNS_COUNT; column++)
+                            {
+                                ImGui::TableSetColumnIndex(column);
+                                if (column == 0) ImGui::Text("%d", mySystem.procList[row].pid);
+                                if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
+                            }
                         }
                     }
                 }
@@ -104,6 +122,8 @@ void ProcessWindow::Draw(bool &pOpen)
             // This is because we don't have a random access on the result on our filter.
             // A real application processing logs with ten of thousands of entries may want to store the result of
             // search/filter.. especially if the filtering function is not trivial (e.g. reg-exp).
+        
+
             for (int line_no = 0; line_no < LineOffsets.Size; line_no++)
             {
                 const char* line_start = buf + LineOffsets[line_no];
