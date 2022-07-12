@@ -6,6 +6,15 @@ A process information gathering tool.  View and inspect memory mappings and load
 
 Uses [LinuxOverlay](https://github.com/Rwkeith/LinuxOverlay) for the UI.
 
+## Features
+
+* Console window
+
+
+* Process window
+
+<img src="https://i.imgur.com/SJuEBaT.png" width="300">
+
 ## Usage
 Position overlay using arrow keys.  Use Numpad +/- for changing the position interval.  Default size is 2560, 1440.  This can be changed with Numpad 1/2 and 4/5. Press insert key to toggle the overlay.
 
