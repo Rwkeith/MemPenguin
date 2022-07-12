@@ -9,6 +9,7 @@ private:
     /* data */
 public:
     std::vector<Process> procList;
+    bool updatingProcList = false;
     System();
     ~System();
     int UpdateProcessList();

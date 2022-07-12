@@ -1,11 +1,26 @@
 #include "ProcessWindow.h"
 
-MainInterface* ProcessWindow::mainInterface;
+MainInterface* ProcessWindow::mainInterface;\
+
+extern System mySystem;
+
+// Make the UI compact because there are so many fields
+static void PushStyleCompact()
+{
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, (float)(int)(style.FramePadding.y * 0.60f)));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, (float)(int)(style.ItemSpacing.y * 0.60f)));
+}
+
+static void PopStyleCompact()
+{
+    ImGui::PopStyleVar(2);
+}
 
 ProcessWindow::ProcessWindow()
 {
     AutoScroll = true;
-    Clear();
+    //Clear();
 }
 
 ProcessWindow::~ProcessWindow()
@@ -20,16 +35,17 @@ void ProcessWindow::Draw(bool &pOpen)
             return;
         }
 
-        // Options menu
-        if (ImGui::BeginPopup("Options"))
+        static bool refresh;
+        if (!refresh)
         {
-            ImGui::Checkbox("Auto-scroll", &AutoScroll);
-            ImGui::EndPopup();
+            refresh = ImGui::Button("Refresh");
+        }
+        else
+        {
+            ImGui::Button("Refresh");
         }
 
-        // Main window
-        if (ImGui::Button("Options"))
-            ImGui::OpenPopup("Options");
+            // if refresh, disable button, update process list in system class, display process list.
         ImGui::SameLine();
         bool clear = ImGui::Button("Clear");
         ImGui::SameLine();
@@ -40,10 +56,44 @@ void ProcessWindow::Draw(bool &pOpen)
         ImGui::Separator();
         ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
-        if (clear)
-            Clear();
-        if (copy)
-            ImGui::LogToClipboard();
+        if (refresh)
+        {
+            static ImGuiTableFlags flags1 = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Borders | ImGuiTableFlags_ContextMenuInBody;
+
+            PushStyleCompact();
+            ImGui::CheckboxFlags("ImGuiTableFlags_ContextMenuInBody", &flags1, ImGuiTableFlags_ContextMenuInBody);
+            PopStyleCompact();
+
+            // Context Menus: first example
+            // [1.1] Right-click on the TableHeadersRow() line to open the default table context menu.
+            // [1.2] Right-click in columns also open the default table context menu (if ImGuiTableFlags_ContextMenuInBody is set)
+            const int COLUMNS_COUNT = 2;
+            if (ImGui::BeginTable("table_context_menu", COLUMNS_COUNT, flags1))
+            {
+                ImGui::TableSetupColumn("PID");
+                ImGui::TableSetupColumn("Process Name");
+                //ImGui::TableSetupColumn("Three");
+
+                // [1.1]] Right-click on the TableHeadersRow() line to open the default table context menu.
+                ImGui::TableHeadersRow();
+
+                // Submit dummy contents
+                if (!mySystem.updatingProcList)
+                {
+                    for (int row = 0; row < mySystem.procList.size(); row++)
+                    {
+                        ImGui::TableNextRow();
+                        for (int column = 0; column < COLUMNS_COUNT; column++)
+                        {
+                            ImGui::TableSetColumnIndex(column);
+                            if (column == 0) ImGui::Text("%d", mySystem.procList[row].pid);
+                            if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
+                        }
+                    }
+                }
+                ImGui::EndTable();
+            }
+        }
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         const char* buf = Buf.begin();
@@ -97,13 +147,6 @@ void ProcessWindow::Draw(bool &pOpen)
 
         ImGui::EndChild();
         ImGui::End();
-}
-
-void ProcessWindow::Clear()
-{
-    Buf.clear();
-    LineOffsets.clear();
-    LineOffsets.push_back(0);
 }
 
 void ProcessWindow::AddLog(const char* fmt, ...)

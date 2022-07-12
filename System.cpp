@@ -12,6 +12,7 @@ System::~System()
 
 int System::UpdateProcessList()
 {
+    updatingProcList = true;
     procList.clear();
 
     int pid;
@@ -36,6 +37,7 @@ int System::UpdateProcessList()
     
     pclose(fp);
     free(lineBuffer);
+    updatingProcList = false;
     return 0;
 }
 

@@ -2,6 +2,8 @@
 #include "Process.h"
 #include "Interface.h"
 
+System mySystem;
+
 int main(int, char**)
 {
     //bool wait = true;

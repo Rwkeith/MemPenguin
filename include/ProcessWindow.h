@@ -9,7 +9,6 @@ private:
     ImGuiTextFilter Filter;
     ImVector<int> LineOffsets; // Index to lines offset. We maintain this with AddLog() calls.
     bool AutoScroll;  // Keep scrolling if already at the bottom.
-    void Clear();
     void AddLog(const char* fmt, ...) IM_FMTARGS(2);
 public:
     static MainInterface* mainInterface;
