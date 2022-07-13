@@ -1,4 +1,4 @@
-#include "include/Process.h"
+#include "Process.h"
 
 Process::Process(const char* inProcName, int inPid)
 {
@@ -100,6 +100,7 @@ void Process::UpdateAddrSpace()
         addrSpaceEntry = {};
     }
 
+    fclose(fp);
     free(lineBuffer);
 }
 
