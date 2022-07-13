@@ -16,7 +16,6 @@ private:
     bool autoScroll;
     bool scrollToBottom;
 public:
-    //System mySystem;
     static MainInterface* mainInterface;
     ConsoleWindow();
     ~ConsoleWindow();

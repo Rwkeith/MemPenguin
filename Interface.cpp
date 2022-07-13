@@ -11,7 +11,7 @@ ProcessWindow MainInterface::procWindow;
 
 MainInterface::MainInterface()
 {
-
+    
 }
 
 MainInterface::~MainInterface()

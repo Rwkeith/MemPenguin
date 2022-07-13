@@ -3,16 +3,30 @@
 System::System()
 {
     UpdateProcessList();
-    PrintProcessList();
 }
 
 System::~System()
 {
 }
 
-int System::UpdateProcessList()
+void System::ThreadUpdateProcs()
 {
-    updatingProcList = true;
+    if (!updateProcsThreadRunning)
+    {
+        updateProcsThreadRunning = true;
+        updatedProcList = false;
+        updateProcs = std::thread(&System::UpdateProcessList, this);
+        updateProcs.detach();
+        printf("Successfully created process update thread.\n");
+        return;
+    }
+    
+    printf("The process update thread is already running...\n");
+}
+
+void System::UpdateProcessList()
+{
+    printf("Updating process list...\n");
     procList.clear();
 
     int pid;
@@ -24,21 +38,32 @@ int System::UpdateProcessList()
 
     if (fp == NULL)
     {
-        printf("Unable to open ps, or invalid argument\n");
-        return -1;
+        perror("Unable to open ps, or invalid argument\n");
+        free(lineBuffer);
+        updateProcsThreadRunning = false;
+        updatedProcList = true;
+        return;
     }
 
+    procListMutex.lock();
     while(fgets(lineBuffer, 0x1000, fp) != NULL)
     {
         sscanf(lineBuffer, "%i %*s %*s %s", &pid, progName);
         procList.push_back(Process(progName, pid));
         memset(progName, 0, 1024);
     }
+    procListMutex.unlock();
+    updatedProcList = true;
+    int ret = pclose(fp);
+    if (ret < 0)
+    {
+        perror("Unable to close fp for 'ps -A'\n");
+    }
     
-    pclose(fp);
     free(lineBuffer);
-    updatingProcList = false;
-    return 0;
+    printf("Finished updating process list.\n");
+    updateProcsThreadRunning = false;
+    return;
 }
 
 void System::PrintProcessList()

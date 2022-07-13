@@ -34,29 +34,41 @@ void ProcessWindow::Draw(bool &pOpen)
             ImGui::End();
             return;
         }
-
+        
+        // if refresh, disable button, update process list in system class, display process list.
         static bool refresh;
-        if (!refresh)
+        if (refresh)
         {
-            refresh = ImGui::Button("Refresh");
+            printf("User hit refresh\n");
+            refresh = false;
+            mySystem.ThreadUpdateProcs();
+            if (mySystem.updatedProcList)
+            {
+                refresh = ImGui::Button("Refresh");
+            }
+        }
+        else if (!refresh && !mySystem.updatedProcList)
+        {
+            ImGui::BeginDisabled();
+            ImGui::Button("Refresh");
+            ImGui::EndDisabled();
         }
         else
         {
-            ImGui::Button("Refresh");
+            refresh = ImGui::Button("Refresh");
         }
 
-            // if refresh, disable button, update process list in system class, display process list.
         ImGui::SameLine();
-        bool clear = ImGui::Button("Clear");
+        /*bool clear = */ImGui::Button("Clear");
         ImGui::SameLine();
-        bool copy = ImGui::Button("Copy");
+        /*bool copy = */ImGui::Button("Copy");
         ImGui::SameLine();
-        Filter.Draw("Filter", -100.0f);
+        filter.Draw("Filter", -100.0f);
 
         ImGui::Separator();
         ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
-        if (refresh)
+        if (!refresh)
         {
             static ImGuiTableFlags flags1 = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Borders | ImGuiTableFlags_ContextMenuInBody;
 
@@ -77,16 +89,15 @@ void ProcessWindow::Draw(bool &pOpen)
                 // [1.1]] Right-click on the TableHeadersRow() line to open the default table context menu.
                 ImGui::TableHeadersRow();
 
-                // Submit dummy contents
-                if (!mySystem.updatingProcList)
+                if (mySystem.procListMutex.try_lock())
                 {
-                    for (int row = 0; row < mySystem.procList.size(); row++)
+                    for (long unsigned int row = 0; row < mySystem.procList.size(); row++)
                     {
-                        if (Filter.IsActive())
+                        if (filter.IsActive())
                         {
                             const char* line_start = mySystem.procList[row].procName.c_str();
                             const char* line_end = mySystem.procList[row].procName.c_str() + mySystem.procList[row].procName.length();
-                            if (Filter.PassFilter(line_start, line_end))
+                            if (filter.PassFilter(line_start, line_end))
                             {
                                 ImGui::TableNextRow();
                                 for (int column = 0; column < COLUMNS_COUNT; column++)
@@ -108,59 +119,11 @@ void ProcessWindow::Draw(bool &pOpen)
                             }
                         }
                     }
+                    mySystem.procListMutex.unlock();
                 }
                 ImGui::EndTable();
             }
         }
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-        const char* buf = Buf.begin();
-        const char* buf_end = Buf.end();
-        if (Filter.IsActive())
-        {
-            // In this example we don't use the clipper when Filter is enabled.
-            // This is because we don't have a random access on the result on our filter.
-            // A real application processing logs with ten of thousands of entries may want to store the result of
-            // search/filter.. especially if the filtering function is not trivial (e.g. reg-exp).
-        
-
-            for (int line_no = 0; line_no < LineOffsets.Size; line_no++)
-            {
-                const char* line_start = buf + LineOffsets[line_no];
-                const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-                if (Filter.PassFilter(line_start, line_end))
-                    ImGui::TextUnformatted(line_start, line_end);
-            }
-        }
-        else
-        {
-            // The simplest and easy way to display the entire buffer:
-            //   ImGui::TextUnformatted(buf_begin, buf_end);
-            // And it'll just work. TextUnformatted() has specialization for large blob of text and will fast-forward
-            // to skip non-visible lines. Here we instead demonstrate using the clipper to only process lines that are
-            // within the visible area.
-            // If you have tens of thousands of items and their processing cost is non-negligible, coarse clipping them
-            // on your side is recommended. Using ImGuiListClipper requires
-            // - A) random access into your data
-            // - B) items all being the  same height,
-            // both of which we can handle since we an array pointing to the beginning of each line of text.
-            // When using the filter (in the block of code above) we don't have random access into the data to display
-            // anymore, which is why we don't use the clipper. Storing or skimming through the search result would make
-            // it possible (and would be recommended if you want to search through tens of thousands of entries).
-            ImGuiListClipper clipper;
-            clipper.Begin(LineOffsets.Size);
-            while (clipper.Step())
-            {
-                for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++)
-                {
-                    const char* line_start = buf + LineOffsets[line_no];
-                    const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-                    ImGui::TextUnformatted(line_start, line_end);
-                }
-            }
-            clipper.End();
-        }
-        ImGui::PopStyleVar();
 
         if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
             ImGui::SetScrollHereY(1.0f);
@@ -171,14 +134,14 @@ void ProcessWindow::Draw(bool &pOpen)
 
 void ProcessWindow::AddLog(const char* fmt, ...)
 {
-    int old_size = Buf.size();
+    int old_size = buffer.size();
     va_list args;
     va_start(args, fmt);
-    Buf.appendfv(fmt, args);
+    buffer.appendfv(fmt, args);
     va_end(args);
-    for (int new_size = Buf.size(); old_size < new_size; old_size++)
-        if (Buf[old_size] == '\n')
-            LineOffsets.push_back(old_size + 1);
+    for (int new_size = buffer.size(); old_size < new_size; old_size++)
+        if (buffer[old_size] == '\n')
+            lineOffsets.push_back(old_size + 1);
 }
 
 void ProcessWindow::RegisterWindow(MainInterface* mainUI)

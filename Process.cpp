@@ -100,6 +100,7 @@ void Process::UpdateAddrSpace()
         addrSpaceEntry = {};
     }
 
+    fclose(fp);
     free(lineBuffer);
 }
 
