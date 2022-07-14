@@ -1,4 +1,8 @@
 #include "Process.h"
+#include "System.h"
+#include <sys/ptrace.h>
+
+extern System mySystem;
 
 Process::Process(const char* inProcName, int inPid)
 {
@@ -14,6 +18,13 @@ Process::Process(const char* inProcName, bool wait)
         return;
     
     UpdateAddrSpace();
+}
+
+Process::Process(const Process& p1)
+{
+    procName = p1.procName;
+    pid = p1.pid;
+    addrSpace = p1.addrSpace;
 }
 
 Process::~Process()
@@ -121,4 +132,31 @@ void Process::PrintAddrSpace()
     {
        printf("%lx-%lx %s %i %s\n", addrSpace[i].startAddr, addrSpace[i].endAddr, addrSpace[i].protection, addrSpace[i].inode, addrSpace[i].path);
     }
+}
+
+int Process::Attach()
+{
+    int ret = ptrace(PTRACE_ATTACH, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        perror("Error, Unable to attach with ptrace.\n");
+        return -1;
+    }
+    printf("Successfully attached to %s\n", procName.c_str());
+    mySystem.isAttached = true;
+    mySystem.attachedProcess = *this;
+    return 0;
+}
+
+int Process::Detach()
+{
+    int ret = ptrace(PTRACE_DETACH, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        perror("Error, Unable to detach with ptrace.\n");
+        return -1;
+    }
+    printf("Successfully detached from %s\n", procName.c_str());
+    mySystem.isAttached = false;
+    return 0;
 }

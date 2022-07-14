@@ -34,11 +34,15 @@ public:
     int pid;
     std::string procName;
     std::vector<AddrSpace> addrSpace;
+    Process() {};
     Process(const char* inProcName, int inPid);
     Process(const char* inProcName, bool wait);
+    Process(const Process& p1);
     ~Process();
     void UpdateAddrSpace();
     void PrintAddrSpace();
     unsigned long GetModuleBase(const char* moduleName);
     std::vector<AddrSpace> GetAddrSpace();
+    int Attach();
+    int Detach();
 };

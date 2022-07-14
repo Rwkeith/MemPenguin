@@ -18,6 +18,8 @@ public:
     std::mutex procListMutex;
     std::vector<Process> procList;
     std::atomic<bool> updatedProcList;
+    std::atomic<bool> isAttached;
+    Process attachedProcess;
     System();
     ~System();
     void ThreadUpdateProcs();
