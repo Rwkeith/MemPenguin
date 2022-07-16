@@ -2,6 +2,7 @@
 #include "System.h"
 #include <sys/ptrace.h>
 #include <sys/wait.h>
+#include <pthread.h>
 
 extern System mySystem;
 
@@ -138,23 +139,16 @@ void Process::PrintAddrSpace()
 int Process::Attach()
 {
     char error[200];
-    int ret = ptrace(PTRACE_ATTACH, pid, NULL, NULL);
+    int ret = ptrace(PTRACE_SEIZE, pid, NULL, NULL);
     if (ret == -1)
     {
         sprintf(error, "Error, Unable to attach to %s with ptrace, pid: %i.\n", procName.c_str(), pid);
         perror(error);
         return -1;
     }
-    int status;
-    //wait(NULL);
-    printf("Successfully attached to %s, pid: %i\n", procName.c_str(), pid);
-    ret = ptrace(PTRACE_CONT, pid, NULL, NULL);
-    if (ret == -1)
-    {
-        sprintf(error, "Error, Unable to continue %s with ptrace, pid: %i.\n", procName.c_str(), pid);
-        perror(error);
-        return -1;
-    }
+
+    printf("Thread %ld: Successfully attached to %s, pid: %i\n", pthread_self(), procName.c_str(), pid);
+
     mySystem.isAttached = true;
     mySystem.attachedProcess = *this;
     return 0;
@@ -163,14 +157,22 @@ int Process::Attach()
 int Process::Detach()
 {
     char error[200];
-    int ret = ptrace(PTRACE_DETACH, pid, NULL, NULL);
+    int ret = ptrace(PTRACE_INTERRUPT, pid, NULL, NULL);
     if (ret == -1)
     {
-        sprintf(error, "Error, Unable to detach from %s with ptrace, pid: %i.\n", procName.c_str(), pid);
+        sprintf(error, "Thread %ld: Error, Unable to interrupt %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
         perror(error);
         return -1;
     }
-    printf("Successfully detached from %s\n", procName.c_str());
+    waitpid(pid, NULL, 0);
+    ret = ptrace(PTRACE_DETACH, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        sprintf(error, "Thread %ld: Error, Unable to detach from %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
+        perror(error);
+        return -1;
+    }
+    printf("Thread %ld: Successfully detached from %s\n", pthread_self(), procName.c_str());
     mySystem.isAttached = false;
     return 0;
 }
