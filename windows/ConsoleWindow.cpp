@@ -16,10 +16,10 @@ ConsoleWindow::ConsoleWindow()
     commands.push_back("HISTORY");
     commands.push_back("CLEAR");
     commands.push_back("CLASSIFY");
-    commands.push_back("processes");
+    commands.push_back("PROCESSES");
     autoScroll = true;
     scrollToBottom = false;
-    AddLog("Welcome to Dear ImGui!");
+    AddLog("MemPenguin Console Initialized.");
 }
 
 ConsoleWindow::~ConsoleWindow()
@@ -67,9 +67,9 @@ void ConsoleWindow::Draw(bool &pOpen)
         ImGui::EndPopup();
     }
 
-    ImGui::TextWrapped(
-        "This example implements a console with basic coloring, completion (TAB key) and history (Up/Down keys). A more elaborate "
-        "implementation may want to store entries along with extra data such as timestamp, emitter, etc.");
+    // ImGui::TextWrapped(
+    //     "This example implements a console with basic coloring, completion (TAB key) and history (Up/Down keys). A more elaborate "
+    //     "implementation may want to store entries along with extra data such as timestamp, emitter, etc.");
     ImGui::TextWrapped("Enter 'HELP' for help.");
 
     // TODO: display items starting from the bottom

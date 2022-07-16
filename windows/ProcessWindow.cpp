@@ -1,21 +1,21 @@
 #include "ProcessWindow.h"
 
-MainInterface* ProcessWindow::mainInterface;\
+MainInterface* ProcessWindow::mainInterface;
 
 extern System mySystem;
 
-// Make the UI compact because there are so many fields
-static void PushStyleCompact()
-{
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, (float)(int)(style.FramePadding.y * 0.60f)));
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, (float)(int)(style.ItemSpacing.y * 0.60f)));
-}
+// // Make the UI compact because there are so many fields
+// static void PushStyleCompact()
+// {
+//     ImGuiStyle& style = ImGui::GetStyle();
+//     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, (float)(int)(style.FramePadding.y * 0.60f)));
+//     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, (float)(int)(style.ItemSpacing.y * 0.60f)));
+// }
 
-static void PopStyleCompact()
-{
-    ImGui::PopStyleVar(2);
-}
+// static void PopStyleCompact()
+// {
+//     ImGui::PopStyleVar(2);
+// }
 
 ProcessWindow::ProcessWindow()
 {
@@ -59,9 +59,46 @@ void ProcessWindow::Draw(bool &pOpen)
         }
 
         ImGui::SameLine();
-        /*bool clear = */ImGui::Button("Clear");
+        static int selectedRow = -1;
+        static bool attach;
+        if (!mySystem.isAttached && selectedRow != -1)
+        {
+
+            attach = ImGui::Button("Attach");
+        }
+        else
+        {
+            ImGui::BeginDisabled();
+            ImGui::Button("Attach");
+            ImGui::EndDisabled();
+        }
+
+        if (attach && selectedRow != -1)
+        {
+            attach = false;
+            mySystem.procList[selectedRow].Attach();
+        }
+        
+
         ImGui::SameLine();
-        /*bool copy = */ImGui::Button("Copy");
+        static bool detach;
+        
+        if (!mySystem.isAttached)
+        {
+            ImGui::BeginDisabled();
+            ImGui::Button("Detach");
+            ImGui::EndDisabled();
+        }
+        else
+        {
+            detach = ImGui::Button("Detach");
+        }
+
+        if (detach && mySystem.isAttached)
+        {
+            detach = false;
+            mySystem.attachedProcess.Detach();
+        }
         ImGui::SameLine();
         filter.Draw("Filter", -100.0f);
 
@@ -71,10 +108,6 @@ void ProcessWindow::Draw(bool &pOpen)
         if (!refresh)
         {
             static ImGuiTableFlags flags1 = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Borders | ImGuiTableFlags_ContextMenuInBody;
-
-            PushStyleCompact();
-            ImGui::CheckboxFlags("ImGuiTableFlags_ContextMenuInBody", &flags1, ImGuiTableFlags_ContextMenuInBody);
-            PopStyleCompact();
 
             // Context Menus: first example
             // [1.1] Right-click on the TableHeadersRow() line to open the default table context menu.
@@ -88,10 +121,10 @@ void ProcessWindow::Draw(bool &pOpen)
 
                 // [1.1]] Right-click on the TableHeadersRow() line to open the default table context menu.
                 ImGui::TableHeadersRow();
-
+                //static bool selected[MAX_PROCESSES] = {};
                 if (mySystem.procListMutex.try_lock())
                 {
-                    for (long unsigned int row = 0; row < mySystem.procList.size(); row++)
+                    for (int row = 0; row < (int)mySystem.procList.size(); row++)
                     {
                         if (filter.IsActive())
                         {
@@ -103,7 +136,12 @@ void ProcessWindow::Draw(bool &pOpen)
                                 for (int column = 0; column < COLUMNS_COUNT; column++)
                                 {
                                     ImGui::TableSetColumnIndex(column);
-                                    if (column == 0) ImGui::Text("%d", mySystem.procList[row].pid);
+                                    if (column == 0)
+                                    {
+                                        char label[32];
+                                        sprintf(label, "%d", mySystem.procList[row].pid);
+                                        if (ImGui::Selectable(label, selectedRow == row, ImGuiSelectableFlags_SpanAllColumns)) selectedRow = row;
+                                    }
                                     if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
                                 }
                             }
@@ -114,7 +152,12 @@ void ProcessWindow::Draw(bool &pOpen)
                             for (int column = 0; column < COLUMNS_COUNT; column++)
                             {
                                 ImGui::TableSetColumnIndex(column);
-                                if (column == 0) ImGui::Text("%d", mySystem.procList[row].pid);
+                                if (column == 0)
+                                {
+                                    char label[32];
+                                    sprintf(label, "%d", mySystem.procList[row].pid);
+                                    if (ImGui::Selectable(label, selectedRow == row, ImGuiSelectableFlags_SpanAllColumns)) selectedRow = row;
+                                }
                                 if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
                             }
                         }

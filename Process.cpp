@@ -1,4 +1,10 @@
 #include "Process.h"
+#include "System.h"
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <pthread.h>
+
+extern System mySystem;
 
 Process::Process(const char* inProcName, int inPid)
 {
@@ -14,6 +20,13 @@ Process::Process(const char* inProcName, bool wait)
         return;
     
     UpdateAddrSpace();
+}
+
+Process::Process(const Process& p1)
+{
+    procName = p1.procName;
+    pid = p1.pid;
+    addrSpace = p1.addrSpace;
 }
 
 Process::~Process()
@@ -121,4 +134,45 @@ void Process::PrintAddrSpace()
     {
        printf("%lx-%lx %s %i %s\n", addrSpace[i].startAddr, addrSpace[i].endAddr, addrSpace[i].protection, addrSpace[i].inode, addrSpace[i].path);
     }
+}
+
+int Process::Attach()
+{
+    char error[200];
+    int ret = ptrace(PTRACE_SEIZE, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        sprintf(error, "Error, Unable to attach to %s with ptrace, pid: %i.\n", procName.c_str(), pid);
+        perror(error);
+        return -1;
+    }
+
+    printf("Thread %ld: Successfully attached to %s, pid: %i\n", pthread_self(), procName.c_str(), pid);
+
+    mySystem.isAttached = true;
+    mySystem.attachedProcess = *this;
+    return 0;
+}
+
+int Process::Detach()
+{
+    char error[200];
+    int ret = ptrace(PTRACE_INTERRUPT, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        sprintf(error, "Thread %ld: Error, Unable to interrupt %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
+        perror(error);
+        return -1;
+    }
+    waitpid(pid, NULL, 0);
+    ret = ptrace(PTRACE_DETACH, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        sprintf(error, "Thread %ld: Error, Unable to detach from %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
+        perror(error);
+        return -1;
+    }
+    printf("Thread %ld: Successfully detached from %s\n", pthread_self(), procName.c_str());
+    mySystem.isAttached = false;
+    return 0;
 }

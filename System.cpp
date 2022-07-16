@@ -27,8 +27,7 @@ void System::ThreadUpdateProcs()
 void System::UpdateProcessList()
 {
     printf("Updating process list...\n");
-    procList.clear();
-
+    
     int pid;
     char progName[1024] = {};
     char commandStr[] = "ps -A";
@@ -46,6 +45,7 @@ void System::UpdateProcessList()
     }
 
     procListMutex.lock();
+    procList.clear();
     while(fgets(lineBuffer, 0x1000, fp) != NULL)
     {
         sscanf(lineBuffer, "%i %*s %*s %s", &pid, progName);

@@ -2,12 +2,11 @@
 
 #include <iostream>
 #include <mutex>
-#include "Process.h"
 #include <thread>
 #include <atomic>
-#include <chrono>
+#include "Process.h"
 
-//using namespace std::chrono_literals;
+#define MAX_PROCESSES 1000
 
 class System
 {
@@ -19,6 +18,8 @@ public:
     std::mutex procListMutex;
     std::vector<Process> procList;
     std::atomic<bool> updatedProcList;
+    std::atomic<bool> isAttached;
+    Process attachedProcess;
     System();
     ~System();
     void ThreadUpdateProcs();
