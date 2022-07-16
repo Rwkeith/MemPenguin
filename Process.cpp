@@ -1,6 +1,7 @@
 #include "Process.h"
 #include "System.h"
 #include <sys/ptrace.h>
+#include <sys/wait.h>
 
 extern System mySystem;
 
@@ -136,13 +137,24 @@ void Process::PrintAddrSpace()
 
 int Process::Attach()
 {
+    char error[200];
     int ret = ptrace(PTRACE_ATTACH, pid, NULL, NULL);
     if (ret == -1)
     {
-        perror("Error, Unable to attach with ptrace.\n");
+        sprintf(error, "Error, Unable to attach to %s with ptrace, pid: %i.\n", procName.c_str(), pid);
+        perror(error);
         return -1;
     }
-    printf("Successfully attached to %s\n", procName.c_str());
+    int status;
+    //wait(NULL);
+    printf("Successfully attached to %s, pid: %i\n", procName.c_str(), pid);
+    ret = ptrace(PTRACE_CONT, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        sprintf(error, "Error, Unable to continue %s with ptrace, pid: %i.\n", procName.c_str(), pid);
+        perror(error);
+        return -1;
+    }
     mySystem.isAttached = true;
     mySystem.attachedProcess = *this;
     return 0;
@@ -150,10 +162,12 @@ int Process::Attach()
 
 int Process::Detach()
 {
+    char error[200];
     int ret = ptrace(PTRACE_DETACH, pid, NULL, NULL);
     if (ret == -1)
     {
-        perror("Error, Unable to detach with ptrace.\n");
+        sprintf(error, "Error, Unable to detach from %s with ptrace, pid: %i.\n", procName.c_str(), pid);
+        perror(error);
         return -1;
     }
     printf("Successfully detached from %s\n", procName.c_str());

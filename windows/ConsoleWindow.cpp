@@ -16,7 +16,7 @@ ConsoleWindow::ConsoleWindow()
     commands.push_back("HISTORY");
     commands.push_back("CLEAR");
     commands.push_back("CLASSIFY");
-    commands.push_back("processes");
+    commands.push_back("PROCESSES");
     autoScroll = true;
     scrollToBottom = false;
     AddLog("MemPenguin Console Initialized.");

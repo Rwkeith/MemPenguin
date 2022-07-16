@@ -15,8 +15,8 @@ files = files(
     'Process.cpp',
     'System.cpp',
     'Interface.cpp',
-    'ProcessWindow.cpp',
-    'ConsoleWindow.cpp',
+    'windows/ProcessWindow.cpp',
+    'windows/ConsoleWindow.cpp',
 )
 
 executable('MemPenguin', files, include_directories : [incdir, imGuiInc, glfwInc], dependencies : [LinuxOverlay] )
