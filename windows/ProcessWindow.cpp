@@ -1,4 +1,5 @@
 #include "ProcessWindow.h"
+#include "ConsoleWindow.h"
 
 MainInterface* ProcessWindow::mainInterface;
 
@@ -117,11 +118,9 @@ void ProcessWindow::Draw(bool &pOpen)
             {
                 ImGui::TableSetupColumn("PID");
                 ImGui::TableSetupColumn("Process Name");
-                //ImGui::TableSetupColumn("Three");
 
                 // [1.1]] Right-click on the TableHeadersRow() line to open the default table context menu.
                 ImGui::TableHeadersRow();
-                //static bool selected[MAX_PROCESSES] = {};
                 if (mySystem.procListMutex.try_lock())
                 {
                     for (int row = 0; row < (int)mySystem.procList.size(); row++)
@@ -140,7 +139,19 @@ void ProcessWindow::Draw(bool &pOpen)
                                     {
                                         char label[32];
                                         sprintf(label, "%d", mySystem.procList[row].pid);
-                                        if (ImGui::Selectable(label, selectedRow == row, ImGuiSelectableFlags_SpanAllColumns)) selectedRow = row;
+                                        if (mySystem.isAttached)
+                                        {
+                                            if (mySystem.attachedProcess.pid == mySystem.procList[row].pid)
+                                            {
+                                                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                                                ImGui::Text("%s", label);
+                                                ImGui::PopStyleColor();
+                                            }
+                                            else
+                                                ImGui::Text("%s", label);
+                                        }
+                                        else
+                                            if (ImGui::Selectable(label, selectedRow == row, ImGuiSelectableFlags_SpanAllColumns)) selectedRow = row;
                                     }
                                     if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
                                 }
@@ -156,7 +167,19 @@ void ProcessWindow::Draw(bool &pOpen)
                                 {
                                     char label[32];
                                     sprintf(label, "%d", mySystem.procList[row].pid);
-                                    if (ImGui::Selectable(label, selectedRow == row, ImGuiSelectableFlags_SpanAllColumns)) selectedRow = row;
+                                    if (mySystem.isAttached)
+                                    {
+                                        if (mySystem.attachedProcess.pid == mySystem.procList[row].pid)
+                                        {
+                                            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                                            ImGui::Text("%s", label);
+                                            ImGui::PopStyleColor();
+                                        }
+                                        else
+                                            ImGui::Text("%s", label);
+                                    }
+                                    else
+                                        if (ImGui::Selectable(label, selectedRow == row, ImGuiSelectableFlags_SpanAllColumns)) selectedRow = row;
                                 }
                                 if (column == 1) ImGui::Text("%s", mySystem.procList[row].procName.c_str());
                             }
@@ -177,6 +200,7 @@ void ProcessWindow::Draw(bool &pOpen)
 
 void ProcessWindow::AddLog(const char* fmt, ...)
 {
+    
     int old_size = buffer.size();
     va_list args;
     va_start(args, fmt);

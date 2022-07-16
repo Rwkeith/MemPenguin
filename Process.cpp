@@ -1,3 +1,5 @@
+#include "Interface.h"
+#include "ConsoleWindow.h"
 #include "Process.h"
 #include "System.h"
 #include <sys/ptrace.h>
@@ -138,17 +140,18 @@ void Process::PrintAddrSpace()
 
 int Process::Attach()
 {
-    char error[200];
+    char msg[200];
     int ret = ptrace(PTRACE_SEIZE, pid, NULL, NULL);
     if (ret == -1)
     {
-        sprintf(error, "Error, Unable to attach to %s with ptrace, pid: %i.\n", procName.c_str(), pid);
-        perror(error);
+        sprintf(msg, "[error] Unable to attach to %s with ptrace, pid: %i.\n", procName.c_str(), pid);
+        MainInterface::console.AddLog(msg);
+        perror(msg);
         return -1;
     }
-
-    printf("Thread %ld: Successfully attached to %s, pid: %i\n", pthread_self(), procName.c_str(), pid);
-
+    sprintf(msg, "Thread %ld: Successfully attached to %s, pid: %i\n", pthread_self(), procName.c_str(), pid);
+    //printf(msg);
+    MainInterface::console.AddLog(msg);
     mySystem.isAttached = true;
     mySystem.attachedProcess = *this;
     return 0;
@@ -156,23 +159,27 @@ int Process::Attach()
 
 int Process::Detach()
 {
-    char error[200];
+    char msg[200];
     int ret = ptrace(PTRACE_INTERRUPT, pid, NULL, NULL);
     if (ret == -1)
     {
-        sprintf(error, "Thread %ld: Error, Unable to interrupt %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
-        perror(error);
+        sprintf(msg, "Thread %ld: Error, Unable to interrupt %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
+        MainInterface::console.AddLog(msg);
+        perror(msg);
         return -1;
     }
     waitpid(pid, NULL, 0);
     ret = ptrace(PTRACE_DETACH, pid, NULL, NULL);
     if (ret == -1)
     {
-        sprintf(error, "Thread %ld: Error, Unable to detach from %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
-        perror(error);
+        sprintf(msg, "Thread %ld: Error, Unable to detach from %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
+        MainInterface::console.AddLog(msg);
+        perror(msg);
         return -1;
     }
-    printf("Thread %ld: Successfully detached from %s\n", pthread_self(), procName.c_str());
+    sprintf(msg, "Thread %ld: Successfully detached from %s\n", pthread_self(), procName.c_str());
+    //printf("%s", msg);
+    MainInterface::console.AddLog(msg);
     mySystem.isAttached = false;
     return 0;
 }
