@@ -12,10 +12,7 @@ private:
     void AddLog(const char* fmt, ...) IM_FMTARGS(2);
 public:
     static MainInterface* mainInterface;
-<<<<<<< HEAD
-=======
     static int selectedRow;
->>>>>>> 1985823 (Added mappings window.)
     bool isVisible;
     ProcessWindow();
     ~ProcessWindow();
