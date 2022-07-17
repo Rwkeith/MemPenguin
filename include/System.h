@@ -11,27 +11,6 @@
 class System
 {
 private:
-<<<<<<< HEAD
-    std::thread updateProcs;
-    std::atomic<bool> updateProcsThreadRunning;
-    void UpdateProcessList();
-=======
-<<<<<<< Updated upstream
-    /* data */
->>>>>>> 1985823 (Added mappings window.)
-public:
-    std::mutex procListMutex;
-    std::vector<Process> procList;
-    std::atomic<bool> updatedProcList;
-    std::atomic<bool> isAttached;
-    Process attachedProcess;
-    System();
-    ~System();
-<<<<<<< HEAD
-    void ThreadUpdateProcs();
-=======
-    int UpdateProcessList();
-=======
     std::thread updateProcs;
     std::thread updateAddrSpace;
     std::atomic<bool> procsThreadRunning;
@@ -50,7 +29,5 @@ public:
     ~System();
     void ThreadUpdateProcs();
     void ThreadUpdateAddrSpace(int procID);
->>>>>>> Stashed changes
->>>>>>> 1985823 (Added mappings window.)
     void PrintProcessList();
 };

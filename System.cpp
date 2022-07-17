@@ -11,25 +11,6 @@ System::~System()
 
 void System::ThreadUpdateProcs()
 {
-<<<<<<< HEAD
-    if (!updateProcsThreadRunning)
-    {
-        updateProcsThreadRunning = true;
-        updatedProcList = false;
-        updateProcs = std::thread(&System::UpdateProcessList, this);
-        updateProcs.detach();
-        printf("Successfully created process update thread.\n");
-        return;
-    }
-    
-    printf("The process update thread is already running...\n");
-}
-
-=======
-<<<<<<< Updated upstream
-    procList.clear();
-
-=======
     if (!procsThreadRunning)
     {
         procsThreadRunning = true;
@@ -58,15 +39,10 @@ void System::ThreadUpdateAddrSpace(int procID)
     printf("The address space update thread is already running...\n");
 }
 
->>>>>>> 1985823 (Added mappings window.)
 void System::UpdateProcessList()
 {
     printf("Updating process list...\n");
     
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> 1985823 (Added mappings window.)
     int pid;
     char progName[1024] = {};
     char commandStr[] = "ps -A";
@@ -76,24 +52,11 @@ void System::UpdateProcessList()
 
     if (fp == NULL)
     {
-<<<<<<< HEAD
-        perror("Unable to open ps, or invalid argument\n");
-        free(lineBuffer);
-        updateProcsThreadRunning = false;
-        updatedProcList = true;
-        return;
-=======
-<<<<<<< Updated upstream
-        printf("Unable to open ps, or invalid argument\n");
-        return -1;
-=======
         perror("Unable to open ps, or invalid argument\n");
         free(lineBuffer);
         procsThreadRunning = false;
         updatedProcList = true;
         return;
->>>>>>> Stashed changes
->>>>>>> 1985823 (Added mappings window.)
     }
 
     procListMutex.lock();
@@ -113,18 +76,9 @@ void System::UpdateProcessList()
     }
     
     free(lineBuffer);
-<<<<<<< HEAD
-    printf("Finished updating process list.\n");
-    updateProcsThreadRunning = false;
-    return;
-=======
-<<<<<<< Updated upstream
-    return 0;
-=======
     printf("Finished updating process list.\n");
     procsThreadRunning = false;
     return;
->>>>>>> Stashed changes
 }
 
 void System::UpdateAddressSpace(int row)
@@ -132,7 +86,6 @@ void System::UpdateAddressSpace(int row)
     addrSpaceMutex.lock();
     procList[row].UpdateAddrSpace();
     addrSpaceMutex.unlock();
->>>>>>> 1985823 (Added mappings window.)
 }
 
 void System::PrintProcessList()
