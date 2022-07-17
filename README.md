@@ -9,6 +9,7 @@ Uses [LinuxOverlay](https://github.com/Rwkeith/LinuxOverlay) for the UI.
 ## Features
 
 * User Interface
+
   * Console window
 <img src="https://i.imgur.com/ZHOuaD6.png" width="300">
 
@@ -25,12 +26,12 @@ Position overlay using arrow keys.  Use Numpad +/- for changing the position int
 
 Uses Meson with Ninja to build.
 
-```
+```console
 meson builddir
 ninja -C builddir
 ```
 
 Then Run
-```
+```console
 sudo ./builddir/MemPenguin
 ```
