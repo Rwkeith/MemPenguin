@@ -48,6 +48,14 @@ void ConsoleWindow::AddLog(const char* fmt, ...)
     items.push_back(Strdup(buf));
 }
 
+<<<<<<< HEAD
+=======
+void ConsoleWindow::AddLog(std::string msg)
+{
+    items.push_back(Strdup(msg.c_str()));
+}
+
+>>>>>>> 1985823 (Added mappings window.)
 void ConsoleWindow::Draw(bool &pOpen)
 {
     ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);

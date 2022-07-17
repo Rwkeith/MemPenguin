@@ -1,10 +1,27 @@
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+#include "include/Process.h"
+=======
+#include "Interface.h"
+#include "ConsoleWindow.h"
+>>>>>>> 1985823 (Added mappings window.)
 #include "Process.h"
 #include "System.h"
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <pthread.h>
+<<<<<<< HEAD
 
 extern System mySystem;
+=======
+#include <string>
+
+
+
+extern System mySystem;
+>>>>>>> Stashed changes
+>>>>>>> 1985823 (Added mappings window.)
 
 Process::Process(const char* inProcName, int inPid)
 {
@@ -93,9 +110,9 @@ unsigned long Process::GetModuleBase(const char* moduleName)
 
 void Process::UpdateAddrSpace()
 {
+    printf("Updating address space of %i\n", pid);
     char *lineBuffer = (char*)calloc(0x1000, 1);
     AddrSpace addrSpaceEntry;
-    
     addrSpace.clear();
     sprintf(lineBuffer, "/proc/%d/maps", pid);
     FILE *fp = fopen(lineBuffer, "r");
@@ -109,11 +126,19 @@ void Process::UpdateAddrSpace()
     while(fgets(lineBuffer, 0x1000, fp) != NULL)
     {
         sscanf(lineBuffer, "%lx-%lx %s %*s %*s %i %s", &addrSpaceEntry.startAddr, &addrSpaceEntry.endAddr, addrSpaceEntry.protection, &addrSpaceEntry.inode, addrSpaceEntry.path);
+        addrSpaceEntry.strPath = addrSpaceEntry.path;
         addrSpace.push_back(addrSpaceEntry);
         addrSpaceEntry = {};
     }
+<<<<<<< Updated upstream
 
+<<<<<<< HEAD
     fclose(fp);
+=======
+=======
+    fclose(fp);
+>>>>>>> Stashed changes
+>>>>>>> 1985823 (Added mappings window.)
     free(lineBuffer);
 }
 
@@ -134,10 +159,16 @@ void Process::PrintAddrSpace()
     {
        printf("%lx-%lx %s %i %s\n", addrSpace[i].startAddr, addrSpace[i].endAddr, addrSpace[i].protection, addrSpace[i].inode, addrSpace[i].path);
     }
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> 1985823 (Added mappings window.)
 }
 
 int Process::Attach()
 {
+<<<<<<< HEAD
     char error[200];
     int ret = ptrace(PTRACE_SEIZE, pid, NULL, NULL);
     if (ret == -1)
@@ -152,10 +183,30 @@ int Process::Attach()
     mySystem.isAttached = true;
     mySystem.attachedProcess = *this;
     return 0;
+=======
+    char msg[200];
+    std::string sMsg;
+    int ret = ptrace(PTRACE_SEIZE, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        sprintf(msg, "[error] Unable to attach to %s with ptrace, pid: %i.\n", procName.c_str(), pid);
+        perror(msg);
+    }
+    else
+    {
+        sprintf(msg, "Thread %ld: Successfully attached to %s, pid: %i\n", pthread_self(), procName.c_str(), pid);
+        mySystem.isAttached = true;
+        mySystem.attachedProcess = *this;
+    }
+    sMsg = msg;
+    MainInterface::console.AddLog(sMsg);
+    return ret;
+>>>>>>> 1985823 (Added mappings window.)
 }
 
 int Process::Detach()
 {
+<<<<<<< HEAD
     char error[200];
     int ret = ptrace(PTRACE_INTERRUPT, pid, NULL, NULL);
     if (ret == -1)
@@ -163,11 +214,23 @@ int Process::Detach()
         sprintf(error, "Thread %ld: Error, Unable to interrupt %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
         perror(error);
         return -1;
+=======
+    char msg[200];
+    std::string sMsg;
+    int ret = ptrace(PTRACE_INTERRUPT, pid, NULL, NULL);
+    if (ret == -1)
+    {
+        sprintf(msg, "Thread %ld: [error] Unable to interrupt %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
+        MainInterface::console.AddLog(sMsg);
+        perror(msg);
+        return ret;
+>>>>>>> 1985823 (Added mappings window.)
     }
     waitpid(pid, NULL, 0);
     ret = ptrace(PTRACE_DETACH, pid, NULL, NULL);
     if (ret == -1)
     {
+<<<<<<< HEAD
         sprintf(error, "Thread %ld: Error, Unable to detach from %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
         perror(error);
         return -1;
@@ -175,4 +238,18 @@ int Process::Detach()
     printf("Thread %ld: Successfully detached from %s\n", pthread_self(), procName.c_str());
     mySystem.isAttached = false;
     return 0;
+=======
+        sprintf(msg, "Thread %ld: [error] Unable to detach from %s with ptrace, pid: %i.\n", pthread_self(), procName.c_str(), pid);
+        perror(msg);
+    }
+    else
+    {
+        sprintf(msg, "Thread %ld: Successfully detached from %s\n", pthread_self(), procName.c_str());
+        mySystem.isAttached = false;
+    }
+    sMsg = msg;
+    MainInterface::console.AddLog(sMsg);
+    return ret;
+>>>>>>> Stashed changes
+>>>>>>> 1985823 (Added mappings window.)
 }

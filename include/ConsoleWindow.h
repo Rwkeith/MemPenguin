@@ -22,6 +22,7 @@ public:
     void RegisterWindow(MainInterface* mainUI);
     void ClearLog();
     void AddLog(const char* fmt, ...) IM_FMTARGS(2);
+    void AddLog(std::string msg);
     void Draw(bool &pOpen);
     void ExecCommand(const char* command_line);
     static int TextEditCallbackStub(ImGuiInputTextCallbackData* data);

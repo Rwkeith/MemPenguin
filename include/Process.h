@@ -24,6 +24,7 @@ struct AddrSpace
     char protection[10];
     unsigned int inode;
     char path[PATH_MAX];
+    std::string strPath;
 };
 
 class Process
